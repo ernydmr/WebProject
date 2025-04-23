@@ -1,20 +1,76 @@
-@model Category
+@model WebProject.ViewModels.CategoryCreateViewModel
 
 <h3>Yeni Kategori Ekle</h3>
 
-<form asp-action ="Create" method="post">
-
+<form asp-action="Create" method="post">
     <div class="mb-3">
-        <label asp-for ="Name" class="form-label">Kategori Adý</label>
-        <input asp-for ="Name" class="form-control"/>
+        <label class="form-label">Kategori Seçimi</label>
+        <div id="category-selects">
+            <select class="form-select category-dropdown" data-level="0">
+                <option value="">Ana kategori seçin</option>
+                @foreach (var item in Model.ParentCategories)
+                {
+                <option value="@item.Value">@item.Text</option>
+                }
+            </select>
+        </div>
+
+        <!-- En son seçilen kategori buraya bind edilir -->
+        <input type="hidden" asp-for="ParentCategoryId" id="SelectedCategoryId" />
+        <span asp-validation-for="ParentCategoryId" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label asp-for ="ParentCategoryId" class="form-label">Üst Kategori</label>
-        <select asp-for="ParentCategoryId" class="form-select" asp-items="ViewBag.Categories">
-            <option value="">Ana Kategori</option>
-        </select>
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
     </div>
 
     <button type="submit" class="btn btn-primary">Ekle</button>
 </form>
+
+@section Scripts {
+    <script>
+    $(document).ready(function () {
+        function loadSubcategories(parentId, level) {
+            $.getJSON('/Category/GetChildCategories', { parentId: parentId }, function (data) {
+                // Daha alt seviyeyi sil
+                $('#category-selects select').filter(function () {
+                    return parseInt($(this).attr('data-level')) > level;
+                }).remove();
+
+                // Alt kategori varsa yeni select ekle
+                if (data.length > 0) {
+                    const nextLevel = level + 1;
+                    let select = $(`<select class="form-select category-dropdown mt-2" data-level="${nextLevel}"><option value="">Alt kategori seçin</option></select>`);
+
+                    $.each(data, function (i, item) {
+                        select.append(`<option value="${item.id}">${item.name}</option>`);
+                    });
+
+                    $('#category-selects').append(select);
+                }
+
+                // hidden input'ý en son seçilen ile güncelle
+                $('#SelectedCategoryId').val(parentId);
+            });
+        }
+
+        // ilk dropdown için
+        $('#category-selects').on('change', '.category-dropdown', function () {
+            const selectedId = $(this).val();
+            const level = parseInt($(this).attr('data-level'));
+
+            if (selectedId) {
+                loadSubcategories(selectedId, level);
+            } else {
+                // Seçim kaldýrýlýrsa hidden input da temizlenmeli
+                $('#SelectedCategoryId').val('');
+                $('#category-selects select').filter(function () {
+                    return parseInt($(this).attr('data-level')) > level;
+                }).remove();
+            }
+        });
+    });
+    </script>
+}

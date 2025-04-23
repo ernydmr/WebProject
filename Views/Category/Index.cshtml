@@ -1,29 +1,30 @@
-@model List<Category>
+ï»¿@model List<WebProject.Models.Category>
 
-    <h3>Kategoriler</h3>
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>Kategoriler</h3>
+            <a asp-action="Create" class="btn btn-success">+ Yeni Kategori Ekle</a>
+        </div>
 
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Ad</th>
-                <th>Üst Kategori</th>
-                <th>Ýþlemler</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Name</td>
-                <td>@(item.ParentCategory?.Name ?? "-")</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Düzenle</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm"
-                       onclick="return confirm('Silmek istediðine emin misin?')">Sil</a>
-                </td>
-            </tr>
-        }
-        </tbody>
-    </table>
+        <div class="card">
+            <div class="card-body">
+                <partial name="_CategoryTree" model="Model" />
+            </div>
+        </div>
+    </div>
 
-    <a asp-action="Create" class="btn btn-success">+ Yeni Kategori</a>
+    @section Styles {
+        <style>
+            ul.list-group {
+                margin-left: 10px;
+                border-left: 1px solid #dee2e6;
+                padding-left: 10px;
+            }
+
+            .list-group-item {
+                background-color: #f8f9fa;
+                margin-bottom: 5px;
+                border-radius: 4px;
+            }
+        </style>
+    }

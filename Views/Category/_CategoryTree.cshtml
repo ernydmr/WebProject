@@ -1,0 +1,10 @@
+﻿@model List<WebProject.Models.Category>
+
+@{
+    ViewData["AllCategories"] = Model;
+}
+
+@foreach (var category in Model.Where(c => c.ParentCategoryId == null))
+{
+    <partial name="_CategoryNode" model="category" />
+}

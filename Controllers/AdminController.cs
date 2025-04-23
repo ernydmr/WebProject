@@ -44,15 +44,6 @@ namespace WebProject.Controllers
         [HttpPost]
         public async Task<IActionResult> AddProduct(ProductFormViewModel model)
         {
-
-            if (!ModelState.IsValid)
-            {
-                model.TopCategories = _context.Categories
-                    .Where(c => c.ParentCategoryId == null).ToList();
-                return View(model);
-            }
-
-
             if (!ModelState.IsValid)
             {
                 model.TopCategories = _context.Categories

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using WebProject.Data;
 using WebProject.Models;
 using Microsoft.AspNetCore.Authorization;
+using WebProject.ViewModels;
 
 namespace WebProject.Controllers;
 
@@ -19,30 +20,57 @@ public class CategoryController : Controller
 
     public IActionResult Index()
     {
-        var categories = _context.Categories.ToList();
+        var categories = _context.Categories
+            .Include(c => c.ParentCategory)
+            .ToList();
+
+        ViewBag.HierarchicalList = GetHierarchicalCategoryList();
         return View(categories);
     }
+
 
     [HttpGet]
     public IActionResult Create()
     {
-        ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name");
-        return View();
+        var vm = new CategoryCreateViewModel
+        {
+            ParentCategories = _context.Categories
+                .Where(c => c.ParentCategoryId == null) // Sadece ana kategoriler
+                .Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = c.Name
+                })
+                .ToList()
+        };
+
+        return View(vm);
     }
+
+
 
     [HttpPost]
-    public IActionResult Create(Category category)
+    public IActionResult Create(CategoryCreateViewModel model)
     {
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            _context.Categories.Add(category);
-            _context.SaveChanges();
-            return RedirectToAction("Index");
+            model.ParentCategories = BuildCategorySelectList(); // burada da doðru liste çaðrýlmalý
+            return View(model);
         }
 
-        ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name");
-        return View(category);
+
+        var category = new Category
+        {
+            Name = model.Name,
+            ParentCategoryId = model.ParentCategoryId
+        };
+
+        _context.Categories.Add(category);
+        _context.SaveChanges();
+
+        return RedirectToAction("Index");
     }
+
 
     [HttpGet]
     public IActionResult Edit(int id)
@@ -105,4 +133,53 @@ public class CategoryController : Controller
 
         return Json(children);
     }
+
+    private List<string> GetHierarchicalCategoryList()
+    {
+        var all = _context.Categories.ToList();
+        var result = new List<string>();
+
+        void BuildList(List<Category> all, int? parentId, string prefix = "")
+        {
+            var children = all.Where(c => c.ParentCategoryId == parentId).ToList();
+            foreach (var child in children)
+            {
+                result.Add($"{prefix}{child.Name}");
+                BuildList(all, child.Id, prefix + "--");
+            }
+        }
+
+        BuildList(all, null);
+        return result;
+    }
+
+    private List<SelectListItem> BuildCategorySelectList()
+    {
+        var allCategories = _context.Categories.ToList();
+        var result = new List<SelectListItem>();
+
+        void BuildList(int? parentId, string prefix)
+        {
+            var children = allCategories.Where(c => c.ParentCategoryId == parentId).OrderBy(c => c.Name).ToList();
+
+            foreach (var category in children)
+            {
+                result.Add(new SelectListItem
+                {
+                    Value = category.Id.ToString(),
+                    Text = prefix + category.Name
+                });
+
+                BuildList(category.Id, prefix + "-- ");
+            }
+        }
+
+        BuildList(null, "");
+        return result;
+    }
+
+
+
+
+
 }
