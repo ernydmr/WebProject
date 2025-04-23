@@ -1,0 +1,49 @@
+﻿@using WebProject.ViewModels;
+@model ProductDetailViewModel
+@{
+    ViewData["Title"] = "Ürün Detayı";
+}
+
+<h2>@Model.Product.Name</h2>
+<img src="@Model.Product.ImageUrl" alt="@Model.Product.Name" class="img-fluid" style="max-width: 300px;" />
+<p>Fiyat: <strong>@Model.Product.Price ₺</strong></p>
+
+<hr />
+<h4>Yorum Ekle</h4>
+<form asp-controller="Product" asp-action="AddComment" method="post">
+    <input type="hidden" name="ProductId" value="@Model.Product.Id" />
+
+    <div class="mb-2">
+        <label>Kullanıcı Adı</label>
+        <input name="UserName" class="form-control" />
+    </div>
+    <div class="mb-2">
+        <label>Yorum</label>
+        <textarea name="Content" class="form-control"></textarea>
+    </div>
+    <div class="mb-2">
+        <label>Puan (1-5)</label>
+        <input name="Rating" type="number" min="1" max="5" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Gönder</button>
+</form>
+
+
+<hr />
+<h4>Yorumlar</h4>
+@if (Model.Comments.Any())
+{
+    foreach (var comment in Model.Comments)
+    {
+<div class="border rounded p-2 mb-2">
+    <strong>@comment.UserName</strong> - <small>@comment.CreatedAt.ToShortDateString()</small><br />
+    ⭐ @comment.Rating / 5<br />
+    <p>@comment.Content</p>
+</div>
+    }
+}
+else
+{
+<p>Henüz yorum yok.</p>
+}

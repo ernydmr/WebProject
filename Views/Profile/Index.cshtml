@@ -1,0 +1,40 @@
+@using WebProject.Models
+@model ApplicationUser
+@{
+    ViewData["Title"] = "Profilim";
+}
+
+<h2>Profil Bilgileri</h2>
+
+<div class="card" style="max-width: 500px;">
+    <div class="card-body">
+        <h5 class="card-title">Kullanýcý Adý</h5>
+        <p>@Model.UserName</p>
+
+        <h5 class="card-title">E-posta</h5>
+        <p>@Model.Email</p>
+
+        <h5 class="card-title">Telefon</h5>
+        <p>@(Model.PhoneNumber ?? "Belirtilmemiþ")</p>
+
+        <h5 class="card-title">Ad Soyad</h5>
+        <p>@(Model.FullName ?? "Belirtilmemiþ")</p>
+
+        <h5 class="card-title">Doðum Tarihi</h5>
+        <p>@(Model.BirthDate?.ToShortDateString() ?? "Belirtilmemiþ")</p>
+
+        <h5 class="card-title">Biyografi</h5>
+        <p>@(Model.Bio ?? "Belirtilmemiþ")</p>
+
+        @if (!string.IsNullOrEmpty(Model.AvatarPath))
+        {
+        <img src="@Model.AvatarPath" alt="Avatar" class="img-thumbnail mb-3" style="max-width: 150px;" />
+        }
+        else
+        {
+        <p><em>Profil resmi yok.</em></p>
+}
+
+        <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn btn-primary">Bilgileri Güncelle</a>
+    </div>
+</div>

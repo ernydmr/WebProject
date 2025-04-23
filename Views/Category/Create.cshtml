@@ -1,0 +1,20 @@
+@model Category
+
+<h3>Yeni Kategori Ekle</h3>
+
+<form asp-action ="Create" method="post">
+
+    <div class="mb-3">
+        <label asp-for ="Name" class="form-label">Kategori Adý</label>
+        <input asp-for ="Name" class="form-control"/>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for ="ParentCategoryId" class="form-label">Üst Kategori</label>
+        <select asp-for="ParentCategoryId" class="form-select" asp-items="ViewBag.Categories">
+            <option value="">Ana Kategori</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Ekle</button>
+</form>

@@ -1,0 +1,23 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build sonuçlarý
+bin/
+obj/
+
+# Logs
+*.log
+
+# Publish klasörü
+publish/
+
+# Kullanýcý dosyalarý
+*.db
+*.DS_Store
+*.swp
+
+# Rider / VS Code
+.idea/
+.vscode/

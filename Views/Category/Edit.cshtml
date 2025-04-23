@@ -1,0 +1,21 @@
+@model Category
+
+<h3>Kategori Düzenle</h3>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ParentCategoryId" class="form-label">Üst Kategori (Varsa)</label>
+        <select asp-for="ParentCategoryId" class="form-select" asp-items="ViewBag.Categories">
+            <option value="">Ana Kategori</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Kaydet</button>
+</form>

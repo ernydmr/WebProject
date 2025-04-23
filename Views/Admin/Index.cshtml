@@ -1,0 +1,42 @@
+﻿@model List<Product>
+
+    <h2>Ürün Listesi</h2>
+
+    <a asp-action="AddProduct" class="btn btn-success mb-3">Yeni Ürün Ekle</a>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Kategori</th>
+                <th>Görsel</th>
+                <th>Ad</th>
+                <th>Fiyat</th>
+                <th>Stok</th>
+                <th>Açıklama</th>
+                <th>İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+    {
+            <tr>
+                <td>@item.Category?.Name</td>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+    {
+                    <img src="@item.ImageUrl" alt="Ürün" style="max-height: 60px;" />
+    }
+                </td>
+                <td>@item.Name</td>
+                <td>@item.Price ₺</td>
+                <td>@item.Stock</td>
+                <td>@item.Description</td>
+
+                <td>
+                    <a asp-action="EditProduct" asp-route-id="@item.Id" class="btn btn-primary btn-sm">Düzenle</a>
+                    <a asp-action="DeleteProduct" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Sil</a>
+                </td>
+            </tr>
+    }
+        </tbody>
+    </table>
