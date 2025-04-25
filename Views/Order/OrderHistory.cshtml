@@ -1,0 +1,20 @@
+﻿@model List<Order>
+
+    <h3>Sipariş Geçmişi</h3>
+
+    @foreach (var order in Model)
+{
+    <div class="card mb-3">
+        <div class="card-header">
+            Sipariş No: @order.Id - @order.CreatedAt.ToString("g")
+        </div>
+        <ul class="list-group list-group-flush">
+            @foreach (var item in order.Items)
+            {
+            <li class="list-group-item">
+                @item.Product.Name - ₺@item.Product.Price
+            </li>
+            }
+        </ul>
+    </div>
+}
