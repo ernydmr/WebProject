@@ -1,0 +1,49 @@
+@using Microsoft.AspNetCore.Identity
+@model IEnumerable<IdentityRole>
+
+
+    @{
+    ViewData["Title"] = "Rol Yönetimi";
+    }
+
+    <h2 class="mb-4">Rol Yönetimi</h2>
+
+    <form asp-action="Add" method="post" class="mb-3 d-flex gap-2">
+        <input type="text" name="roleName" class="form-control w-25" placeholder="Yeni rol adý" required />
+        <button type="submit" class="btn btn-success">Ekle</button>
+    </form>
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Rol Adý</th>
+                <th style="width: 200px;">Ýþlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var role in Model)
+        {
+            <tr>
+                <td>@role.Name</td>
+                <td>
+                    @if (role.Name != "admin")
+                    {
+                    <form asp-action="Rename" method="post" class="d-inline-flex gap-2 align-items-center">
+                        <input type="hidden" name="id" value="@role.Id" />
+                        <input type="text" name="newName" class="form-control form-control-sm w-auto" placeholder="Yeni ad" />
+                        <button class="btn btn-sm btn-outline-primary">Deðiþtir</button>
+                    </form>
+                    <form asp-action="Delete" method="post" class="d-inline ms-2">
+                        <input type="hidden" name="id" value="@role.Id" />
+                        <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Rol silinsin mi?')">Sil</button>
+                    </form>
+                    }
+                    else
+                    {
+                    <span class="text-muted">Korunan rol</span>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>

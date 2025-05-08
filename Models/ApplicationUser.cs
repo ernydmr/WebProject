@@ -15,5 +15,8 @@ namespace WebProject.Models
         public string? Bio { get; set; }
 
         public string? AvatarPath { get; set; }
+
+        public ICollection<Product>? Products { get; set; }
+
     }
 }

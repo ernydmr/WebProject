@@ -1,0 +1,38 @@
+﻿@model ApplicationUser
+@{
+    ViewData["Title"] = "Kullanıcı Profili";
+}
+
+<div class="card mx-auto shadow" style="max-width: 600px;">
+    <div class="card-body text-center">
+
+        @if (!string.IsNullOrEmpty(Model.AvatarPath))
+        {
+        <img src="@Model.AvatarPath" class="rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover;" />
+        }
+        else
+        {
+        <div class="rounded-circle bg-light d-inline-block mb-3" style="width: 120px; height: 120px; line-height: 120px; font-size: 24px;">
+            <span class="text-muted">👤</span>
+        </div>
+        }
+
+        <h4 class="card-title">@Html.Raw(Model.FullName ?? "<span class='text-muted fst-italic'>Ad Soyad Yok</span>")</h4>
+        
+        <h6 class="text-muted">@Model.UserName</h6>
+
+        <div class="text-start mt-4">
+            <p><strong>Biyografi:</strong><br />@(string.IsNullOrWhiteSpace(Model.Bio) ? "<i class='text-muted'>Belirtilmemiş</i>" : Model.Bio)</p>
+        </div>
+
+        <div class="mt-4 d-flex justify-content-center gap-2">
+            <a asp-controller="Product" asp-action="SellerProducts" asp-route-userId="@Model.Id" class="btn btn-outline-secondary">
+                Satıcının Ürünleri
+            </a>
+
+            <a asp-controller="Message" asp-action="Create" asp-route-recipientId="@Model.Id" class="btn btn-outline-primary">
+                Mesaj Gönder
+            </a>
+        </div>
+    </div>
+</div>

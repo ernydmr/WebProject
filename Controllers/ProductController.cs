@@ -23,13 +23,17 @@ public class ProductController : Controller
 
     public IActionResult Index()
     {
-        var products = _context.Products.ToList(); // 
+        var products = _context.Products
+            .Include( p => p.User)
+            .ToList(); // 
         return View(products);
     }
 
     public IActionResult Detail(int id)
     {
-        var product = _context.Products.FirstOrDefault(p => p.Id == id);
+        var product = _context.Products
+            .Include(p => p.User)
+            .FirstOrDefault(p => p.Id == id);
         if (product == null) return NotFound();
 
         var comments = _context.Comments
@@ -67,6 +71,27 @@ public class ProductController : Controller
 
         return RedirectToAction("Detail", new { id = comment.ProductId });
     }
+
+    [AllowAnonymous]
+    public async Task<IActionResult> SellerProducts(string userId)
+    {
+        if (string.IsNullOrEmpty(userId))
+            return NotFound();
+
+        var seller = await _userManager.FindByIdAsync(userId);
+        if (seller == null)
+            return NotFound();
+
+        var products = await _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.User)
+            .Where(p => p.UserId == userId)
+            .ToListAsync();
+
+        ViewBag.Seller = seller;
+        return View("Index", products);
+    }
+
 
 
     [Authorize]

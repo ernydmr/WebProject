@@ -8,7 +8,7 @@ using WebProject.ViewModels;
 
 namespace WebProject.Controllers;
 
-[Authorize(Roles = "admin")]
+[Authorize(Roles = "admin,seller")]
 public class CategoryController : Controller
 {
     private readonly AppDbContext _context;

@@ -18,6 +18,8 @@ public class ProfileController : Controller
     public async Task<IActionResult> Index()
     {
         var user = await _userManager.GetUserAsync(User);
+        var roles = await _userManager.GetRolesAsync(user);
+        ViewBag.Roles = roles;
         return View(user);
     }
 }

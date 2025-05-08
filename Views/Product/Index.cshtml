@@ -13,6 +13,13 @@
                 <div class="card-body">
                     <h5 class="card-title">@item.Name</h5>
                     <p class="card-text">@item.Price ₺</p>
+                    <p>
+                        Satıcı:
+                        <a asp-controller="User" asp-action="Profile" asp-route-id="@item.User?.Id">
+                            @item.User?.UserName
+                        </a>
+                    </p>
+
                     <a href="/Product/Detail/@item.Id" class="btn btn-outline-primary">Detay</a>
                     @if (item.Stock > 0)
 {

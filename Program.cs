@@ -43,6 +43,8 @@ using (var scope = app.Services.CreateScope())
     {
         await userManager.AddToRoleAsync(adminUser, "admin");
     }
+    if (!await roleManager.RoleExistsAsync("seller"))
+        await roleManager.CreateAsync(new IdentityRole("seller"));
 }
 
 

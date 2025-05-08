@@ -44,6 +44,15 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin Paneli</a>
                         </li>
                         }
+
+                        @if (User.IsInRole("seller"))
+{
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Seller" asp-action="MyProducts">İlanlarım</a>
+                        </li>
+}
+
+
                         <ul class="navbar-nav">
                             @if (User.Identity?.IsAuthenticated ?? false)
         {

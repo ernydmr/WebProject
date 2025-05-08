@@ -1,0 +1,90 @@
+@model IEnumerable<ApplicationUser>
+    @{
+    ViewData["Title"] = "Kullanýcý Listesi";
+    var roles = (Dictionary<string, IList<string>>)ViewBag.UserRoles;
+    var allRoles = (List<string>)ViewBag.AllRoles;
+    }
+
+    <h2 class="mb-4">Kullanýcýlar</h2>
+
+    <div class="d-flex gap-2 mb-3">
+        <select id="userFilterField" class="form-select w-auto">
+            <option value="email">Email</option>
+            <option value="username">Kullanýcý Adý</option>
+            <option value="role">Rol</option>
+        </select>
+        <input type="text" id="userSearch" class="form-control w-25" placeholder="Arama terimi yazýn..." />
+    </div>
+
+    <table class="table table-bordered table-hover align-middle" id="userTable">
+        <thead class="table-light">
+            <tr>
+                <th>Kullanýcý Adý</th>
+                <th>Email</th>
+                <th>Roller</th>
+                <th style="width: 260px;">Ýþlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+        {
+            <tr>
+                <td class="username">@user.UserName</td>
+                <td class="email">@user.Email</td>
+                <td class="role">
+                    @foreach (var role in roles.ContainsKey(user.Id) ? roles[user.Id] : new List<string>())
+                    {
+                    <span class="badge bg-secondary me-1">@role</span>
+                    }
+                </td>
+                <td>
+                    <form asp-action="AssignRole" method="post" class="d-flex align-items-center gap-2 mb-1">
+                        <input type="hidden" name="userId" value="@user.Id" />
+                        <select name="selectedRole" class="form-select form-select-sm w-auto">
+                            <option disabled selected>Rol Seç</option>
+                            @foreach (var role in allRoles)
+                            {
+                                if (!(roles.ContainsKey(user.Id) && roles[user.Id].Contains(role)))
+                                {
+                            <option value="@role">@role</option>
+                                }
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-outline-success">Ata</button>
+                    </form>
+
+                    @foreach (var role in roles.ContainsKey(user.Id) ? roles[user.Id] : new List<string>())
+                    {
+                    <form asp-action="RemoveRole" method="post" class="d-inline-block me-1">
+                        <input type="hidden" name="userId" value="@user.Id" />
+                        <input type="hidden" name="role" value="@role" />
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Rolü Sil: @role</button>
+                    </form>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    @section Scripts {
+        <script>
+        const searchInput = document.getElementById("userSearch");
+        const filterField = document.getElementById("userFilterField");
+        const rows = document.querySelectorAll("#userTable tbody tr");
+
+        function filterUsers() {
+            const term = searchInput.value.toLowerCase().trim();
+            const field = filterField.value;
+
+            rows.forEach(row => {
+                const targetCell = row.querySelector(`.${field}`);
+                const text = targetCell?.innerText.toLowerCase() || "";
+                row.style.display = term === "" || text.includes(term) ? "" : "none";
+            });
+        }
+
+        searchInput.addEventListener("input", filterUsers);
+        filterField.addEventListener("change", filterUsers);
+        </script>
+    }

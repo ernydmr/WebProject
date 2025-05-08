@@ -1,40 +1,50 @@
-@using WebProject.Models
+ï»¿@using WebProject.Models
+@using Microsoft.AspNetCore.Identity
 @model ApplicationUser
+
 @{
     ViewData["Title"] = "Profilim";
 }
 
-<h2>Profil Bilgileri</h2>
-
-<div class="card" style="max-width: 500px;">
-    <div class="card-body">
-        <h5 class="card-title">Kullanýcý Adý</h5>
-        <p>@Model.UserName</p>
-
-        <h5 class="card-title">E-posta</h5>
-        <p>@Model.Email</p>
-
-        <h5 class="card-title">Telefon</h5>
-        <p>@(Model.PhoneNumber ?? "Belirtilmemiþ")</p>
-
-        <h5 class="card-title">Ad Soyad</h5>
-        <p>@(Model.FullName ?? "Belirtilmemiþ")</p>
-
-        <h5 class="card-title">Doðum Tarihi</h5>
-        <p>@(Model.BirthDate?.ToShortDateString() ?? "Belirtilmemiþ")</p>
-
-        <h5 class="card-title">Biyografi</h5>
-        <p>@(Model.Bio ?? "Belirtilmemiþ")</p>
-
+<div class="card mx-auto shadow" style="max-width: 600px;">
+    <div class="card-body text-center">
         @if (!string.IsNullOrEmpty(Model.AvatarPath))
         {
-        <img src="@Model.AvatarPath" alt="Avatar" class="img-thumbnail mb-3" style="max-width: 150px;" />
+        <img src="@Model.AvatarPath" class="rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover;" />
         }
         else
         {
-        <p><em>Profil resmi yok.</em></p>
+        <div class="rounded-circle bg-light d-inline-block mb-3" style="width: 120px; height: 120px; line-height: 120px; font-size: 24px;">
+            <span class="text-muted">ðŸ‘¤</span>
+        </div>
+        }
+
+        <h4 class="card-title">@Html.Raw(Model.FullName ?? "<span class='text-muted fst-italic'>Ad Soyad Yok</span>")</h4>
+
+        <h6 class="text-muted">@Model.UserName</h6>
+        @if (ViewBag.Roles != null)
+{
+        <div class="mt-2">
+            @foreach (string role in (List<string>)ViewBag.Roles)
+        {
+            <span class="badge bg-secondary me-1">@role</span>
+        }
+        </div>
 }
 
-        <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn btn-primary">Bilgileri Güncelle</a>
+    <div class="text-start mt-4">
+        <p><strong>E-posta:</strong> @Model.Email</p>
+        <p><strong>Telefon:</strong> @Html.Raw(Model.PhoneNumber ?? "<span class='text-muted fst-italic'>BelirtilmemiÅŸ</span>")</p>
+        <p><strong>DoÄŸum Tarihi:</strong> @Html.Raw(Model.BirthDate?.ToString("dd MMM yyyy") ?? "<span class='text-muted fst-italic'>BelirtilmemiÅŸ</span>")</p>
+        <p>
+            <strong>Biyografi:</strong><br />
+            @Html.Raw(string.IsNullOrWhiteSpace(Model.Bio) ? "<span class='text-muted fst-italic'>BelirtilmemiÅŸ</span>" : Model.Bio)
+        </p>
+
+    </div>
+
+        <div class="mt-4">
+            <a asp-area="Identity" asp-page="/Account/Manage/Index" class="btn btn-outline-primary">Bilgileri GÃ¼ncelle</a>
+        </div>
     </div>
 </div>

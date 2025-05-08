@@ -1,0 +1,48 @@
+@model IEnumerable<Product>
+    @{
+    ViewData["Title"] = "Ýlanlarým";
+    }
+
+    <h2 class="mb-4">Ýlanlarým</h2>
+
+    <div class="mb-3">
+        <a class="btn btn-success" asp-action="AddProduct">+ Yeni Ürün Ekle</a>
+    </div>
+
+    <table class="table table-bordered table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Görsel</th>
+                <th>Ad</th>
+                <th>Fiyat</th>
+                <th>Stok</th>
+                <th>Kategori</th>
+                <th style="width: 150px;">Ýþlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in Model)
+        {
+            <tr>
+                <td>
+                    @if (!string.IsNullOrEmpty(p.ImageUrl))
+                    {
+                    <img src="@p.ImageUrl" style="max-height: 60px;" class="img-thumbnail" />
+                    }
+                    else
+                    {
+                    <span class="text-muted">Yok</span>
+                    }
+                </td>
+                <td>@p.Name</td>
+                <td>@($"{p.Price:C}")</td>
+                <td>@p.Stock</td>
+                <td>@p.Category?.Name</td>
+                <td>
+                    <a class="btn btn-sm btn-primary me-1" asp-action="EditProduct" asp-route-id="@p.Id">Düzenle</a>
+                    <a class="btn btn-sm btn-danger" asp-action="DeleteProduct" asp-route-id="@p.Id">Sil</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>

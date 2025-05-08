@@ -1,0 +1,75 @@
+@model WebProject.ViewModels.ProductFormViewModel
+
+<h2>Yeni Ürün Ekle</h2>
+
+<form asp-action="AddProduct" method="post" enctype="multipart/form-data">
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Price" class="form-label"></label>
+        <input asp-for="Price" class="form-control" />
+        <span asp-validation-for="Price" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Stock" class="form-label"></label>
+        <input asp-for="Stock" class="form-control" type="number" />
+    </div>
+
+    <div id="category-container">
+        <div class="mb-3">
+            <label class="form-label">Üst Kategori</label>
+            <select id="level1" class="form-select category-select" data-level="0">
+                <option value="">Seç</option>
+                @foreach (var cat in Model.TopCategories)
+                {
+                <option value="@cat.Id">@cat.Name</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <input type="hidden" asp-for="CategoryId" />
+
+    <div class="mb-3">
+        <label asp-for="ImageFile" class="form-label">Görsel</label>
+        <input asp-for="ImageFile" class="form-control" type="file" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Ürünü Kaydet</button>
+</form>
+
+@section Scripts {
+    <script>
+        $(document).on("change", ".category-select", function () {
+            const selectedId = $(this).val();
+            const level = parseInt($(this).data("level"));
+
+            $('#category-container .category-select').slice(level + 1).remove();
+            $('input[name="CategoryId"]').val(selectedId);
+
+            if (!selectedId) return;
+
+            $.getJSON('/Category/GetChildCategories', { parentId: selectedId }, function (data) {
+                if (data.length > 0) {
+                    let select = $('<select class="form-select category-select mt-2" data-level="' + (level + 1) + '">');
+                    select.append('<option value="">Alt Kategori Seç</option>');
+                    $.each(data, function (i, item) {
+                        select.append(`<option value="${item.id}">${item.name}</option>`);
+                    });
+                    $('#category-container').append(select);
+                }
+            });
+        });
+    </script>
+}

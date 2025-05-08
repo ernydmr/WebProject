@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using WebProject.Data;
 using WebProject.Models;
 using WebProject.ViewModels;
+using System.Security.Claims;
+
 
 
 namespace WebProject.Controllers
@@ -13,18 +16,126 @@ namespace WebProject.Controllers
     public class  AdminController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public AdminController(AppDbContext context)
+
+        public AdminController(AppDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _context = context;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
+
+        [HttpGet]
         public IActionResult Index()
+        {
+            return View();
+
+        }
+
+        [HttpGet]
+        public IActionResult ProductList(string search)
+        {
+            var productsQuery = _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.User)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                productsQuery = productsQuery.Where(p =>
+                    p.Name.Contains(search) ||
+                    p.Description.Contains(search) ||
+                    p.User.UserName.Contains(search));
+            }
+
+            ViewBag.Search = search;
+
+            var products = productsQuery.ToList();
+            return View(products);
+        }
+
+
+        [HttpGet]
+        public IActionResult FilteredProducts(string term)
         {
             var products = _context.Products
                 .Include(p => p.Category)
+                .Include(p => p.User)
+                .Where(p => p.Name.Contains(term) ||
+                            p.Description.Contains(term) ||
+                            p.User.UserName.Contains(term))
+                .Select(p => new {
+                    p.Id,
+                    p.Name,
+                    p.Price,
+                    p.Stock,
+                    p.Description,
+                    Category = p.Category.Name,
+                    Seller = p.User.UserName,
+                    p.ImageUrl
+                })
                 .ToList();
-            return View(products);
+
+            return Json(products);
         }
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> Users(string search)
+        {
+            var usersQuery = _userManager.Users.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                usersQuery = usersQuery.Where(u =>
+                    u.Email.Contains(search) || u.Id.Contains(search));
+            }
+
+            var users = await usersQuery.ToListAsync();
+
+            var userRoles = new Dictionary<string, IList<string>>();
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                userRoles[user.Id] = roles;
+            }
+
+            var allRoles = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
+
+            ViewBag.UserRoles = userRoles;
+            ViewBag.AllRoles = allRoles;
+            ViewBag.Search = search;
+
+            return View(users);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> AssignRole(string userId, string selectedRole)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null && !(await _userManager.IsInRoleAsync(user, selectedRole)))
+            {
+                await _userManager.AddToRoleAsync(user, selectedRole);
+            }
+            return RedirectToAction("Users");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveRole(string userId, string role)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null && await _userManager.IsInRoleAsync(user, role))
+            {
+                await _userManager.RemoveFromRoleAsync(user, role);
+            }
+            return RedirectToAction("Users");
+        }
+
+
 
         [HttpGet]
         public IActionResult AddProduct()
@@ -77,7 +188,8 @@ namespace WebProject.Controllers
                 Description = model.Description,
                 Stock = model.Stock,
                 CategoryId = model.CategoryId,
-                ImageUrl = imagePath
+                ImageUrl = imagePath,
+                UserId = User.FindFirstValue(ClaimTypes.NameIdentifier)
             };
 
             _context.Products.Add(product);
@@ -152,7 +264,7 @@ namespace WebProject.Controllers
                 _context.Products.Remove(product);
                 _context.SaveChanges();
             }
-            return RedirectToAction("Index");
+            return RedirectToAction("ProductList");
         }
 
     }
