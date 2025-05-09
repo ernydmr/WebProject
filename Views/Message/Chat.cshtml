@@ -1,0 +1,119 @@
+﻿@model List<WebProject.Models.Message>
+    @using WebProject.Models
+
+    @{
+    var chatWith = (ApplicationUser)ViewBag.ChatWith;
+    ViewData["Title"] = $"{chatWith.UserName} ile Sohbet";
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    }
+
+    <h2 class="mb-4">@chatWith.UserName ile Mesajlaşma</h2>
+
+    <div class="card shadow-sm">
+        <div class="card-body" id="chatBox" style="max-height: 400px; overflow-y: auto;">
+            @foreach (var msg in Model)
+        {
+            var isMine = msg.SenderId == currentUserId;
+            <div class="d-flex @(isMine ? "justify-content-end" : "justify-content-start") mb-2">
+                <div class="p-2 rounded-3" style="max-width: 70%; background-color: @(isMine ? "#DCF8C6" : "#F1F0F0");">
+                    <div class="fw-bold small text-muted mb-1">
+                        @(isMine ? "Siz" : msg.Sender.UserName)
+                    </div>
+                    <div>@msg.Content</div>
+                    <div class="text-end text-muted small mt-1">
+                        @msg.SentAt.ToString("HH:mm")
+                        @if (isMine)
+                        {
+                        <span class="read-status text-primary" data-id="@msg.Id">
+                            @(msg.IsRead ? "✓✓" : "✓")
+                        </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+            <div id="typingIndicator" class="text-muted small mt-2" style="display:none;">Yazıyor...</div>
+        </div>
+
+        <div class="card-footer bg-white border-top pt-3">
+            <div class="d-flex align-items-center">
+                <textarea name="content" id="messageInput" class="form-control me-2" rows="1" style="resize:none;" placeholder="Mesaj yaz..." required></textarea>
+                <button type="button" class="btn btn-primary" id="sendBtn">Gönder</button>
+            </div>
+        </div>
+    </div>
+
+    @section Scripts {
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+        <script>
+        const chatBox = document.getElementById('chatBox');
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        const currentUserId = '@currentUserId';
+        const otherUserId = '@chatWith.Id';
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/messageHub")
+            .build();
+
+        connection.on("ReceiveMessage", function (senderId, message) {
+            if (senderId === otherUserId) {
+                const div = document.createElement("div");
+                div.className = "d-flex justify-content-start mb-2";
+                div.innerHTML = `
+                    <div class="p-2 rounded-3 bg-light" style="max-width: 70%;">
+                        <div class="fw-bold small text-muted mb-1">${senderId}</div>
+                        <div>${message}</div>
+                    </div>`;
+                chatBox.appendChild(div);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        });
+
+        connection.on("ShowTyping", function (senderId) {
+            if (senderId === otherUserId) {
+                const indicator = document.getElementById("typingIndicator");
+                indicator.style.display = "block";
+                clearTimeout(indicator.timer);
+                indicator.timer = setTimeout(() => indicator.style.display = "none", 2000);
+            }
+        });
+
+        connection.on("MessagesMarkedAsRead", function (readerId) {
+            if (readerId === otherUserId) {
+                const ticks = document.querySelectorAll('.read-status');
+                ticks.forEach(t => t.innerText = '✓✓');
+            }
+        });
+
+        connection.start().then(() => {
+            // Bildir: Ben mesajları okudum
+            connection.invoke("MarkMessagesAsRead", otherUserId, currentUserId);
+        }).catch(err => console.error(err.toString()));
+
+        document.getElementById("sendBtn").addEventListener("click", function () {
+            const input = document.getElementById("messageInput");
+            const message = input.value.trim();
+            if (!message) return;
+
+            connection.invoke("SendMessage", currentUserId, otherUserId, message);
+
+            // Kendi mesajını anında göster
+            const div = document.createElement("div");
+            div.className = "d-flex justify-content-end mb-2";
+            div.innerHTML = `
+                <div class="p-2 rounded-3 bg-success text-white" style="max-width: 70%;">
+                    <div>${message}</div>
+                    <div class="text-end small mt-1"><span class="read-status text-white">✓</span></div>
+                </div>`;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            input.value = "";
+        });
+
+        document.getElementById("messageInput").addEventListener("input", function () {
+            connection.invoke("Typing", currentUserId, otherUserId);
+        });
+        </script>
+    }

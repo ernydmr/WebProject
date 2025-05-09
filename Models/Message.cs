@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 
-namepace WebProject.Models;
+namespace WebProject.Models;
 
 
 public class Message

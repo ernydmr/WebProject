@@ -29,6 +29,9 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Ürünler</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Message" asp-action="Index">Messages</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Profile" asp-action="Index">Profil</a>
                         </li>
                         @if (User.IsInRole("admin"))
@@ -75,7 +78,7 @@
                             </li>
         }
                         </ul>
-</div>
+                </div>
             </div>
         </nav>
     </header>
@@ -97,6 +100,35 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+    const userId = '@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value';
+
+    if (userId) {
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/messageHub")
+            .build();
+
+        connection.on("ReceiveMessage", function (senderId, message) {
+            // Sayfa fark etmeksizin toast bildirim
+            const alert = document.createElement("div");
+            alert.className = "toast show position-fixed bottom-0 end-0 m-4 bg-success text-white";
+            alert.style.zIndex = 9999;
+            alert.setAttribute("role", "alert");
+            alert.innerHTML = `
+                <div class="toast-body">
+                    <strong>Yeni mesaj:</strong> ${message.substring(0, 50)}...
+                    <a href="/Message/Index" class="btn btn-sm btn-light ms-2">Görüntüle</a>
+                </div>`;
+            document.body.appendChild(alert);
+
+            setTimeout(() => alert.remove(), 5000);
+        });
+
+        connection.start().catch(err => console.error(err.toString()));
+    }
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

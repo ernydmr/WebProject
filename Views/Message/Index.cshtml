@@ -1,0 +1,41 @@
+﻿@model List<WebProject.Models.Message>
+    @using WebProject.Models
+    @{
+    ViewData["Title"] = "Mesajlarım";
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    }
+
+    <h2 class="mb-4">Mesajlarım</h2>
+
+    @if (!Model.Any())
+{
+    <div class="alert alert-info">Henüz mesaj yok.</div>
+}
+else
+{
+    <ul class="list-group">
+        @foreach (var msg in Model.OrderByDescending(m => m.SentAt))
+        {
+            var otherUser = msg.SenderId == currentUserId ? msg.Receiver : msg.Sender;
+            var isUnread = !msg.IsRead && msg.ReceiverId == currentUserId;
+
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <a asp-action="Chat" asp-route-userId="@otherUser.Id" class="text-decoration-none flex-grow-1">
+                <div class="fw-bold">@otherUser.UserName</div>
+                <div class="text-muted small">@msg.Content.Substring(0, Math.Min(40, msg.Content.Length))...</div>
+                <div class="small text-muted">@msg.SentAt.ToString("g")</div>
+            </a>
+            <div class="ms-2 text-end">
+                @if (isUnread)
+                    {
+                <span class="badge bg-danger">Yeni</span>
+                    }
+                    else if (msg.SenderId == currentUserId)
+                    {
+                <span class="badge bg-secondary">Okundu</span>
+                    }
+            </div>
+        </li>
+        }
+    </ul>
+}

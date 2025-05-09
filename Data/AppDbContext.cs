@@ -27,11 +27,20 @@ namespace WebProject.Data
                 .HasForeignKey(c => c.ParentCategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+
             modelBuilder.Entity<Product>()
                 .HasOne(p => p.User)
                 .WithMany(u => u.Products)
                 .HasForeignKey(p => p.UserId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.Sender)
+                .WithMany()
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
         }
     }
 }

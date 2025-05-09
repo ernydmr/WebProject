@@ -1,11 +1,11 @@
 @{
-    var receiver = (WebProject.Models.ApplicationUser)ViewBag.Recipient;
+    var receiver = (WebProject.Models.ApplicationUser)ViewBag.Receiver;
 }
 
 <h2>@receiver.UserName kiþisine mesaj gönder</h2>
 
 <form asp-action="Create" method="post">
-    <input type="hidden" name="recipientId" value="@receiver.Id" />
+    <input type="hidden" name="receiverId" value="@receiver.Id" />
     <textarea name="content" class="form-control mb-2" placeholder="Mesajýnýzý yazýn..." rows="4"></textarea>
     <button type="submit" class="btn btn-primary">Gönder</button>
 </form>
