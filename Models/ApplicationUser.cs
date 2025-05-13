@@ -18,5 +18,7 @@ namespace WebProject.Models
 
         public ICollection<Product>? Products { get; set; }
 
+        public DateTime? LastSeen { get; set; }
+
     }
 }

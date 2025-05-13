@@ -8,7 +8,7 @@
 <img src="@Model.Product.ImageUrl" alt="@Model.Product.Name" class="img-fluid" style="max-width: 300px;" />
 <div>
     <strong>Satıcı:</strong>
-    <a asp-controller="User" asp-action="Profile" asp-route-id="@Model.Product.User?.Id">
+    <a asp-controller="User" asp-action="Profile" asp-route-username="@Model.Product.User?.UserName">
         @Model.Product.User?.UserName
     </a>
 </div>

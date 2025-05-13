@@ -29,7 +29,11 @@
             @foreach (var user in Model)
         {
             <tr>
-                <td class="username">@user.UserName</td>
+                <td class="username">
+                    <a asp-controller="User" asp-action="Profile" asp-route-username="@user.UserName">
+                        @user.UserName
+                    </a>
+                </td>
                 <td class="email">@user.Email</td>
                 <td class="role">
                     @foreach (var role in roles.ContainsKey(user.Id) ? roles[user.Id] : new List<string>())

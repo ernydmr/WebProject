@@ -4,6 +4,7 @@ using System.Security.Claims;
 using WebProject.Data;
 using WebProject.Models;
 using WebProject.Hubs;
+using WebProject.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddSingleton<UserPresenceService>();
+
 
 var app = builder.Build();
 
@@ -80,8 +83,17 @@ app.MapHub<MessageHub>("/messageHub");
 
 // ➤ MVC routing
 app.MapRazorPages();
+
+// ÖZEL ROUTE: Username tabanlı profil görüntüleme
+app.MapControllerRoute(
+    name: "userProfile",
+    pattern: "User/Profile/{username}",
+    defaults: new { controller = "User", action = "Profile" });
+
+// DEFAULT ROUTE: Ana sayfa, diğer tüm controller'lar için gerekli
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
 
 app.Run();

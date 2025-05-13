@@ -15,7 +15,7 @@
                     <p class="card-text">@item.Price ₺</p>
                     <p>
                         Satıcı:
-                        <a asp-controller="User" asp-action="Profile" asp-route-id="@item.User?.Id">
+                        <a asp-controller="User" asp-action="Profile" asp-route-username="@item.User?.UserName">
                             @item.User?.UserName
                         </a>
                     </p>

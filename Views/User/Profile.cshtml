@@ -6,6 +6,20 @@
 <div class="card mx-auto shadow" style="max-width: 600px;">
     <div class="card-body text-center">
 
+        <h6 class="text-muted">
+            @Model.UserName
+            @if (ViewBag.IsOnline == true)
+    {
+            <span class="badge bg-success ms-2">Çevrimiçi</span>
+    }
+    else if (Model.LastSeen != null)
+    {
+            <span class="badge bg-secondary ms-2">Son görülme: @Model.LastSeen?.ToString("g")</span>
+    }
+        </h6>
+
+
+
         @if (!string.IsNullOrEmpty(Model.AvatarPath))
         {
         <img src="@Model.AvatarPath" class="rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover;" />
@@ -18,7 +32,7 @@
         }
 
         <h4 class="card-title">@Html.Raw(Model.FullName ?? "<span class='text-muted fst-italic'>Ad Soyad Yok</span>")</h4>
-        
+
         <h6 class="text-muted">@Model.UserName</h6>
 
         <div class="text-start mt-4">

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using WebProject.Data;
 using WebProject.Models;
 using Microsoft.AspNetCore.Identity;
+using WebProject.Services;
 
 namespace WebProject.Hubs
 {
@@ -10,11 +11,14 @@ namespace WebProject.Hubs
     {
         private readonly AppDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserPresenceService _presence;
 
-        public MessageHub(AppDbContext context, UserManager<ApplicationUser> userManager)
+
+        public MessageHub(AppDbContext context, UserManager<ApplicationUser> userManager, UserPresenceService presence)
         {
             _context = context;
             _userManager = userManager;
+            _presence = presence;
         }
 
         public async Task SendMessage(string senderId, string receiverId, string content)
@@ -43,10 +47,27 @@ namespace WebProject.Hubs
             var userId = Context.UserIdentifier;
             if (!string.IsNullOrEmpty(userId))
             {
+                _presence.SetOnline(userId);
                 await Groups.AddToGroupAsync(Context.ConnectionId, userId);
             }
 
             await base.OnConnectedAsync();
+        }
+
+        public override async Task OnDisconnectedAsync(Exception? exception)
+        {
+            var userId = Context.UserIdentifier;
+            if(!string.IsNullOrEmpty(userId))
+            {
+                _presence.SetOffline(userId);
+                var user = await _userManager.FindByIdAsync(userId);
+                if(user != null)
+                {
+                    user.LastSeen = DateTime.Now;
+                    await _userManager.UpdateAsync(user);
+                }
+            }
+            await base.OnDisconnectedAsync(exception);
         }
 
         public async Task MarkMessagesAsRead(string senderId, string readerId)

@@ -52,7 +52,7 @@
                 <td class="seller">
                     @if (item.User != null)
                     {
-                    <a asp-controller="User" asp-action="Profile" asp-route-id="@item.User.Id">
+                    <a asp-controller="User" asp-action="Profile" asp-route-name="@item.User.UserName">
                         @item.User.UserName
                     </a>
                     }
