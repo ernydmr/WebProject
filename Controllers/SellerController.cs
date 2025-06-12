@@ -10,7 +10,7 @@ using WebProject.ViewModels;
 
 namespace WebProject.Controllers;
 
-[Authorize(Roles = "seller")]
+[Authorize(Roles = "seller,admin")]
 public class SellerController : Controller
 {
     private readonly AppDbContext _context;

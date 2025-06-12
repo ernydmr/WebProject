@@ -267,6 +267,33 @@ namespace WebProject.Controllers
             return RedirectToAction("ProductList");
         }
 
+        public async Task<IActionResult> Orders()
+        {
+            var orders = await _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.Items)
+                    .ThenInclude(i => i.Product)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToListAsync();
+
+            return View(orders);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateOrderStatus(int orderId, OrderStatus newStatus)
+        {
+            var order = await _context.Orders.FindAsync(orderId);
+            if (order ==null)
+            {
+                return NotFound();
+            }
+            order.Status = newStatus;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Orders));
+        }
+
     }
 
 

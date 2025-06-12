@@ -1,0 +1,34 @@
+@model IEnumerable<WebProject.Models.Address>
+
+    <h2>Adreslerim</h2>
+
+    <a asp-action="Add" class="btn btn-primary mb-3">Yeni Adres Ekle</a>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Adres</th>
+                <th>Þehir</th>
+                <th>Posta Kodu</th>
+                <th>Telefon</th>
+                <th>Ýþlem</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var addr in Model)
+        {
+            <tr>
+                <td>@addr.FullAddress</td>
+                <td>@addr.City</td>
+                <td>@addr.PostalCode</td>
+                <td>@addr.Phone</td>
+                <td>
+                    <form asp-action="Delete" method="post">
+                        <input type="hidden" name="id" value="@addr.Id" />
+                        <button type="submit" class="btn btn-sm btn-danger">Sil</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>

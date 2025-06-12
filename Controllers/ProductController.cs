@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using WebProject.Data;
-using WebProject.Models; // Eðer `User` gibi modeller kullanýyorsan
+using WebProject.Models; // Eï¿½er `User` gibi modeller kullanï¿½yorsan
 using WebProject.ViewModels;
-using System.Threading.Tasks; // Register/Login ViewModel’lerini kullanmak için
+using System.Threading.Tasks; // Register/Login ViewModelï¿½lerini kullanmak iï¿½in
 
 namespace WebProject.Controllers;
 public class ProductController : Controller
@@ -98,36 +98,13 @@ public class ProductController : Controller
     public async Task<IActionResult> Buy(int id)
     {
         var product = await _context.Products.FindAsync(id);
-        if (product == null || product.Stock <=0 )
+        if (product == null || product.Stock <= 0)
         {
-            return NotFound();
-        }
-
-        if (product.Stock <= 0)
-        {
-            TempData["Error"] = "Ürün Stokta Yok!";
+            TempData["Error"] = "ÃœrÃ¼n Stokta Yok!";
             return RedirectToAction("Detail", new { id = id });
         }
 
-        var UserId = _userManager.GetUserId(User);
-
-        var order = new Order
-        {
-            UserId = UserId,
-            CreatedAt = DateTime.Now,
-            Items = new List<OrderItem>
-            {
-                new OrderItem
-                {
-                    ProductId = product.Id
-                }
-            }
-        };
-        product.Stock--;
-        _context.Orders.Add(order);
-        _context.Products.Update(product);
-        await _context.SaveChangesAsync();
-
-        return RedirectToAction("OrderHistory", "Order");
+        // OrderController'daki Checkout action'Ä±na yÃ¶nlendir
+        return RedirectToAction("Checkout", "Order", new { id = id });
     }
 }

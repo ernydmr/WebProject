@@ -20,5 +20,9 @@ namespace WebProject.Models
 
         public DateTime? LastSeen { get; set; }
 
+        public decimal Balance { get; set; } = 0;
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
     }
 }

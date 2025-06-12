@@ -15,4 +15,21 @@ public class Order
 
     public List<OrderItem> Items { get; set; } = new();
 
+    public int AddressId { get; set; }
+
+    public Address Address { get; set; }
+
+    public decimal TotalPrice { get; set; }
+
+    public OrderStatus Status { get; set; } = OrderStatus.Pending;
+
+}
+public enum OrderStatus
+{
+    Pending,
+    Approved,
+    Preparing,
+    Shipped,
+    Delivered,
+    Cancelled
 }

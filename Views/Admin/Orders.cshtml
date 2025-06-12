@@ -1,0 +1,90 @@
+@model List<Order>
+    @{
+    ViewData["Title"] = "Sipariþ Yönetimi";
+    }
+
+    <div class="container">
+        <h2>Sipariþ Yönetimi</h2>
+
+        <div class="table-container">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Sipariþ No</th>
+                        <th>Müþteri</th>
+                        <th>Ürünler</th>
+                        <th>Tutar</th>
+                        <th>Tarih</th>
+                        <th>Durum</th>
+                        <th>Ýþlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model)
+                {
+                    <tr>
+                        <td>@order.Id</td>
+                        <td>@order.User.UserName</td>
+                        <td>
+                            @foreach (var item in order.Items)
+                        {
+                            <div>@item.Product.Name (Adet : @item.Quantity)</div>
+                        }
+                        </td>
+                        <td>@order.TotalPrice.ToString("C")</td>
+                        <td>@order.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>
+                            <span class="badge bg-@GetStatusColor(order.Status)">
+                                @GetStatusText(order.Status)
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                                    Durumu Güncelle
+                                </button>
+                                <ul class="dropdown-menu">
+                                    @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
+                                {
+                                    <li>
+                                        <form asp-action="UpdateOrderStatus" method="post" class="d-inline">
+                                            <input type="hidden" name="orderId" value="@order.Id" />
+                                            <input type="hidden" name="newStatus" value="@status" />
+                                            <button type="submit" class="dropdown-item">@GetStatusText(status)</button>
+                                        </form>
+                                    </li>
+                                }
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    @functions {
+    string GetStatusText(OrderStatus status) => status switch
+    {
+        OrderStatus.Pending => "Beklemede",
+        OrderStatus.Approved => "Onaylandý",
+        OrderStatus.Preparing => "Hazýrlanýyor",
+        OrderStatus.Shipped => "Kargoya Verildi",
+        OrderStatus.Delivered => "Teslim Edildi",
+        OrderStatus.Cancelled => "Ýptal Edildi",
+        _ => status.ToString()
+    };
+
+    string GetStatusColor(OrderStatus status) => status switch
+    {
+        OrderStatus.Pending => "warning",
+        OrderStatus.Approved => "info",
+        OrderStatus.Preparing => "primary",
+        OrderStatus.Shipped => "success",
+        OrderStatus.Delivered => "secondary",
+        OrderStatus.Cancelled => "danger",
+        _ => "light"
+    };
+    }

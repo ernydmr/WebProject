@@ -1,20 +1,67 @@
-﻿@model List<Order>
+﻿@model IEnumerable<WebProject.Models.Order>
 
-    <h3>Sipariş Geçmişi</h3>
+<h2>Siparişlerim</h2>
 
-    @foreach (var order in Model)
+@if (TempData["Success"] != null)
 {
-    <div class="card mb-3">
-        <div class="card-header">
-            Sipariş No: @order.Id - @order.CreatedAt.ToString("g")
-        </div>
-        <ul class="list-group list-group-flush">
-            @foreach (var item in order.Items)
-            {
-            <li class="list-group-item">
-                @item.Product.Name - ₺@item.Product.Price
-            </li>
-            }
-        </ul>
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        Henüz hiç siparişiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <div class="row">
+        @foreach (var order in Model)
+        {
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            Sipariş #@order.Id
+                            <small class="text-muted float-end">@order.CreatedAt.ToString("dd.MM.yyyy HH:mm")</small>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Sipariş Detayları</h6>
+                        
+                        <div class="mb-3">
+                            <strong>Toplam Tutar:</strong> @order.TotalPrice.ToString("C")
+                        </div>
+
+                        <div class="mb-3">
+                            <strong>Teslimat Adresi:</strong>
+                            <p class="mb-0">
+                                @order.Address.FullAddress<br>
+                                @order.Address.City, @order.Address.PostalCode
+                            </p>
+                        </div>
+
+                        <h6 class="card-subtitle mb-2 text-muted">Ürünler</h6>
+                        <ul class="list-group list-group-flush">
+                            @foreach (var item in order.Items)
+                            {
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>@item.Product.Name</strong>
+                                            <br>
+                                            <small class="text-muted">Adet: @item.Quantity</small>
+                                        </div>
+                                        <span class="text-muted">@item.Product.Price.ToString("C")</span>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 }

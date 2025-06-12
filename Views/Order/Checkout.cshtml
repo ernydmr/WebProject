@@ -1,0 +1,133 @@
+@model WebProject.ViewModels.OrderViewModel
+
+<h2>Siparişi Tamamla</h2>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Ürün Bilgileri</h5>
+        <div class="row">
+            <div class="col-md-8">
+                <p class="card-text">
+                    <strong>Ürün Adı:</strong> @ViewBag.Product.Name<br>
+                    <strong>Fiyat:</strong> <span id="unitPrice">@ViewBag.Product.Price</span> TL<br>
+                    <strong>Stok:</strong> @ViewBag.Product.Stock adet
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form asp-action="Checkout" method="post" id="checkoutForm">
+    <input type="hidden" asp-for="ProductId" />
+
+    <div class="mb-3">
+        <label class="form-label">Adet</label>
+        <input type="number" asp-for="Quantity" class="form-control" min="1" max="100" id="quantity" />
+        <span asp-validation-for="Quantity" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Adres Seç</label>
+        <select asp-for="SelectedAddressId" class="form-select">
+            <option value="">Adres Seçiniz</option>
+            @foreach (var addr in Model.Addresses)
+            {
+                <option value="@addr.Id">@addr.FullAddress, @addr.City (@addr.PostalCode)</option>
+            }
+        </select>
+        <span asp-validation-for="SelectedAddressId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <a asp-action="Add" asp-controller="Address" class="btn btn-outline-primary">Yeni Adres Ekle</a>
+    </div>
+
+    <div class="mb-3">
+        <strong>Toplam Tutar:</strong> <span id="totalPrice">@((ViewBag.Product.Price * Model.Quantity).ToString("C"))</span>
+    </div>
+
+    <button type="submit" class="btn btn-success" id="submitButton">Siparişi Onayla</button>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            function updateTotalPrice() {
+                var quantity = parseInt($('#quantity').val()) || 0;
+                var unitPrice = parseFloat($('#unitPrice').text()) || 0;
+                var total = quantity * unitPrice;
+                $('#totalPrice').text(total.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' }));
+            }
+
+            $('#quantity').on('input', function() {
+                updateTotalPrice();
+            });
+
+            $('#checkoutForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                var quantity = parseInt($('#quantity').val()) || 0;
+                var addressId = $('#SelectedAddressId').val();
+                var submitButton = $('#submitButton');
+
+                // Validasyon kontrolleri
+                if (!quantity || quantity < 1) {
+                    alert('Lütfen geçerli bir adet giriniz.');
+                    return false;
+                }
+
+                if (!addressId) {
+                    alert('Lütfen bir adres seçiniz.');
+                    return false;
+                }
+
+                // Submit butonunu devre dışı bırak
+                submitButton.prop('disabled', true);
+                submitButton.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> İşleniyor...');
+
+                // Formu gönder
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        if (response.success) {
+                            window.location.href = response.redirectUrl;
+                        } else {
+                            alert(response.message || 'Bir hata oluştu.');
+                            submitButton.prop('disabled', false);
+                            submitButton.html('Siparişi Onayla');
+                        }
+                    },
+                    error: function(xhr) {
+                        var errorMessage = 'Bir hata oluştu. Lütfen tekrar deneyin.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        alert(errorMessage);
+                        submitButton.prop('disabled', false);
+                        submitButton.html('Siparişi Onayla');
+                    }
+                });
+
+                return false;
+            });
+        });
+    </script>
+}
